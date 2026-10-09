@@ -33,6 +33,7 @@ Route::group([
         Route::get('images', [ImageController::class, 'images']);
         Route::delete('images/{key}', [ImageController::class, 'destroy']);
         Route::get('albums', [AlbumController::class, 'index']);
+        Route::post('albums', [AlbumController::class, 'store']);
         Route::delete('albums/{id}', [AlbumController::class, 'destroy']);
         Route::delete('tokens', [TokenController::class, 'clear']);
         Route::get('profile', [UserController::class, 'index']);

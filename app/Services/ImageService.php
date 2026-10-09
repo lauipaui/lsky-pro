@@ -143,6 +143,14 @@ class ImageService
                 }
             }
 
+            // 请求中显式指定的相册优先（Api 上传时使用）
+            if ($request->filled('album_id')) {
+                if (! $user->albums()->where('id', $request->input('album_id'))->exists()) {
+                    throw new UploadException('指定的相册不存在');
+                }
+                $image->album_id = (int) $request->input('album_id');
+            }
+
             $image->user_id = $user->id;
             // 用户设置的图片默认权限
             $image->permission = $user->configs->get(UserConfigKey::DefaultPermission, ImagePermission::Private);

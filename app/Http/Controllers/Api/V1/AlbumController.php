@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AlbumController extends Controller
 {
@@ -20,6 +21,29 @@ class AlbumController extends Controller
             $album->setVisible(['id', 'name', 'intro', 'image_num']);
         });
         return $this->success('success', $albums);
+    }
+
+    public function store(Request $request): Response
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        try {
+            $request->validate([
+                'name' => 'required|string|max:100',
+                'intro' => 'nullable|string|max:2000',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->fail($e->validator->errors()->first());
+        }
+
+        /** @var Album $album */
+        $album = $user->albums()->create([
+            'name' => $request->input('name'),
+            'intro' => $request->input('intro', ''),
+        ]);
+        $album->setVisible(['id', 'name', 'intro', 'image_num']);
+        return $this->success('创建成功', $album);
     }
 
     public function destroy(Request $request): Response
