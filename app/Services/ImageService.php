@@ -136,19 +136,19 @@ class ImageService
                 throw new UploadException('储存空间不足');
             }
 
-            // 图片保存至默认相册(若有)
-            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+            if ($request->filled('album_id')) {
+                // 请求中显式指定相册（Api 上传时使用），album_id=0 表示不放入任何相册
+                if ((int) $request->input('album_id') !== 0) {
+                    if (! $user->albums()->where('id', $request->input('album_id'))->exists()) {
+                        throw new UploadException('指定的相册不存在');
+                    }
+                    $image->album_id = (int) $request->input('album_id');
+                }
+            } elseif ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+                // 图片保存至默认相册(若有)
                 if ($user->albums()->where('id', $albumId)->exists()) {
                     $image->album_id = $albumId;
                 }
-            }
-
-            // 请求中显式指定的相册优先（Api 上传时使用）
-            if ($request->filled('album_id')) {
-                if (! $user->albums()->where('id', $request->input('album_id'))->exists()) {
-                    throw new UploadException('指定的相册不存在');
-                }
-                $image->album_id = (int) $request->input('album_id');
             }
 
             $image->user_id = $user->id;
